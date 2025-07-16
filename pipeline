@@ -17,7 +17,7 @@ pipeline {
                           -Dsonar.projectKey=myproject \
                           -Dsonar.sources=. \
                           -Dsonar.host.url=http://13.201.65.236:9000 \
-                          -Dsonar.login=$SONAR_TOKEN
+                          -Dsonar.login=$sonarqube-token
                         '''
                     }
                 }
