@@ -6,10 +6,6 @@ pipeline {
         choice(name: 'ACTION', choices: ['build', 'test', 'deploy'], description: 'Build action')
     }
 
-    tools {
-        sonarQubeScanner 'SonarScanner'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -26,13 +22,14 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('SonarQube') {
                         sh '''
                           sonar-scanner \
-                          -Dsonar.projectKey=myproject \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=http://13.201.65.236:9000 \
-                          -Dsonar.login=$sonarqube-token
+                            -Dsonar.projectKey=myproject \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://13.201.65.236:9000 \
+                            -Dsonar.login=$SONAR_TOKEN
                         '''
                     }
                 }
