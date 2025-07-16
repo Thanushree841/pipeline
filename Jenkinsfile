@@ -1,6 +1,15 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'ENV', defaultValue: 'dev', description: 'Environment to deploy')
+        choice(name: 'ACTION', choices: ['build', 'test', 'deploy'], description: 'Build action')
+    }
+
+    tools {
+        sonarQubeScanner 'SonarScanner'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,10 +17,16 @@ pipeline {
             }
         }
 
+        stage('Print Parameters') {
+            steps {
+                echo "Running in environment: ${params.ENV}"
+                echo "Action selected: ${params.ACTION}"
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('SonarQube') {
+                withSonarQubeEnv('SonarQube') {
                         sh '''
                           sonar-scanner \
                           -Dsonar.projectKey=myproject \
