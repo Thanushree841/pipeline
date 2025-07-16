@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        sonarQubeScanner 'sonar_scanner'
-    }
-
     parameters {
         string(name: 'ENV', defaultValue: 'dev', description: 'Environment to deploy')
         choice(name: 'ACTION', choices: ['build', 'test', 'deploy'], description: 'Build action')
