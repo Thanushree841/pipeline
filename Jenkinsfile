@@ -24,13 +24,17 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('SonarQube') {
-                        sh '''
-                          sonar-scanner \
-                            -Dsonar.projectKey=myproject \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://13.201.65.236:9000 \
-                            -Dsonar.login=$SONAR_TOKEN
-                        '''
+                        script {
+                            // Get Sonar Scanner path
+                            def scannerHome = tool 'sonar_scanner'  // this name must match the one in Global Tool Config
+                            sh """
+                              ${scannerHome}/bin/sonar-scanner \
+                                -Dsonar.projectKey=myproject \
+                                -Dsonar.sources=. \
+                                -Dsonar.host.url=http://13.201.65.236:9000 \
+                                -Dsonar.login=$SONAR_TOKEN
+                            """
+                        }
                     }
                 }
             }
