@@ -19,7 +19,7 @@ pipeline {
         stage('SonarQube Scan') {
             steps {
                 withSonarQubeEnv('MySonar') {
-                    sh 'sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=. -Dsonar.login=<your-token>'
+                    sh 'sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=. -Dsonar.login=squ_c7336fe02907a871f12e2b763e59116c057245e0'
                 }
             }
         }
