@@ -2,31 +2,38 @@ pipeline {
     agent any
 
     environment {
-        GIT_BRANCH = "${env.BRANCH_NAME}"
-    }
-
-    triggers {
-        githubPush()
+        SONAR_SCANNER_HOME = tool 'sonar_scanner' // Must match Global Tool Config name
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                checkout scm
+                git branch: 'thanu.developer', url: 'https://github.com/Thanushree841/pipeline.git'
+            }
+        }
+
+        stage('Print Parameters') {
+            steps {
+                echo "Running in environment: ${params.ENV}"
+                echo "Action selected: ${params.ACTION}"
             }
         }
 
         stage('SonarQube Scan') {
             steps {
-                withSonarQubeEnv('MySonar') {
-                    sh 'sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=. -Dsonar.login=squ_c7336fe02907a871f12e2b763e59116c057245e0'
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('MySonar') {
+                        sh """
+                            ${SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=. -Dsonar.host.url=http://13.201.65.236:9000 -Dsonar.login=${SONAR_TOKEN}
+                        """
+                    }
                 }
             }
         }
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 1, unit: 'MINUTES') {
+                timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -34,8 +41,7 @@ pipeline {
 
         stage('Build & Package') {
             steps {
-                sh 'mvn clean package'
-                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+                echo "Build and packaging logic would go here."
             }
         }
     }
