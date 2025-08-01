@@ -13,8 +13,7 @@ pipeline {
     githubPush()
   }
 
-  tools {
-    maven 'Maven 3.9.4'                 // Optional: replace with your Jenkins Maven installation name
+  tools {                // Optional: replace with your Jenkins Maven installation name
     sonarQubeScanner 'sonar-scanner'   // Must match the name in Global Tool Configuration
   }
 
