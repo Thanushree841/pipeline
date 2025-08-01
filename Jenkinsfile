@@ -1,61 +1,51 @@
 pipeline {
-  agent any
+agent any
 
-  tools {
-    sonarQube 'sonar_scanner' // Must match name in Global Tool Configuration
+tools {
+// Must match name in Jenkins > Global Tool Configuration > SonarQube Scanner installations
+sonarQube 'sonar_scanner'
+}
+
+environment {
+// Must match ID of a secret text credential in Jenkins
+SONAR_TOKEN = credentials('sonar-token')
+}
+
+triggers {
+githubPush() // Automatically trigger on GitHub push
+}
+
+stages {
+  stage('Checkout Code') {
+  steps {
+    checkout scm // Checks out current branch from GitHub
   }
+}
 
-  environment {
-    SONAR_TOKEN = credentials('sonar-token') // Replace with actual Jenkins credential ID
-  }
-
-  triggers {
-    githubPush() // Trigger build on GitHub push
-  }
-
-  stages {
-
-    stage('Checkout Code') {
-      steps {
-        checkout scm
-      }
-    }
-
-    stage('SonarQube Scan') {
-      steps {
-        withSonarQubeEnv('MySonar') { // Must match name in Jenkins Configure System
-          sh '''#!/bin/bash
-sonar-scanner \
-  -Dsonar.projectKey=myproject \
-  -Dsonar.sources=. \
-  -Dsonar.login=$SONAR_TOKEN
-'''
-        }
-      }
-    }
-
-    stage('Quality Gate') {
-      steps {
-        timeout(time: 2, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: true
-        }
-      }
-    }
-
-    stage('Build & Package') {
-      steps {
-        sh 'mvn clean package'
-        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
-      }
+stage('SonarQube Scan') {
+  steps {
+    withSonarQubeEnv('MySonar') { // Must match name defined under "Configure System"
+      sh '''#!/bin/bash
+        sonar-scanner \
+          -Dsonar.projectKey=myproject \
+          -Dsonar.sources=. \
+          -Dsonar.login=$SONAR_TOKEN
+      '''
     }
   }
+}
 
-  post {
-    success {
-      echo '✅ Build, scan, and packaging successful.'
+stage('Quality Gate') {
+  steps {
+    timeout(time: 2, unit: 'MINUTES') {
+      waitForQualityGate abortPipeline: true
     }
-    failure {
-      echo '❌ Build or analysis failed.'
-    }
+  }
+}
+
+stage('Build & Package') {
+  steps {
+    sh 'mvn clean package'
+    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
   }
 }
