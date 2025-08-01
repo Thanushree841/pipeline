@@ -27,9 +27,7 @@ pipeline {
     stage('SonarQube Scan') {
       steps {
         script {
-          // Get the path to sonar-scanner installation
           def scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-
           withSonarQubeEnv('sonar-scanner') {
             sh """
               export PATH=\$PATH:${scannerHome}/bin
@@ -61,7 +59,10 @@ pipeline {
 
   post {
     success {
-      echo '✅ Build, scan, and packaging successful.'
+      echo "✅ Build, scan, and packaging successful."
     }
     failure {
-      echo '❌ Build
+      echo "❌ Build or analysis failed."
+    }
+  }
+}
