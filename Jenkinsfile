@@ -1,13 +1,9 @@
 pipeline {
   agent any
 
-  tools {
-    // Reference the tool name as defined above
-    sonarScanner 'sonar_scanner'
-  }
-
   environment {
-    SONAR_TOKEN = credentials(' SONAR_TOKEN') // Jenkins credential ID
+    // Replace with your actual credential ID for SonarQube token
+    SONAR_TOKEN = credentials('SONAR_TOKEN')
   }
 
   parameters {
