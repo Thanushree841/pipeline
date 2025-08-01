@@ -1,11 +1,14 @@
 pipeline {
     agent any
+    }
 
     environment {
-        SONAR_SCANNER_HOME = tool 'sonar_scanner' // Must match Global Tool Config name
+        // This must match the name configured in Global Tool Configuration
+        SONAR_SCANNER_HOME = tool 'sonar_scanner'
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'thanu.developer', url: 'https://github.com/Thanushree841/pipeline.git'
@@ -23,8 +26,8 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('MySonar') {
-                      sh "${SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=. -Dsonar.host.url=http://13.203.103.245:30900 -Dsonar.login=${SONAR_TOKEN}"
-
+                        echo "Running Sonar Scanner from: ${SONAR_SCANNER_HOME}/bin/sonar-scanner"
+                        sh "${SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=. -Dsonar.host.url=http://13.203.103.245:30900 -Dsonar.login=${SONAR_TOKEN}"
                     }
                 }
             }
@@ -41,8 +44,10 @@ pipeline {
         stage('Build & Package') {
             steps {
                 echo "Build and packaging logic would go here."
+                // Example (Uncomment if using Maven):
+                // sh 'mvn clean package'
+                // archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
         }
     }
 }
-
