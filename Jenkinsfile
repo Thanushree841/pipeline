@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    SONAR_TOKEN = credentials('SONAR_TOKEN')
+    SONAR_TOKEN = credentials('SONAR_TOKEN') // Your Jenkins credential ID for the token
   }
 
   parameters {
@@ -29,7 +29,6 @@ pipeline {
       steps {
         withSonarQubeEnv('sonar-scanner') {
           sh '''
-            export PATH=$PATH:/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonar-scanner/bin
             sonar-scanner \
               -Dsonar.projectKey=myproject \
               -Dsonar.sources=. \
@@ -53,8 +52,7 @@ pipeline {
         archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
       }
     }
-
-  } // end of stages
+  }
 
   post {
     success {
@@ -64,5 +62,4 @@ pipeline {
       echo '❌ Build or analysis failed.'
     }
   }
-
-} // end of pipeline
+}
