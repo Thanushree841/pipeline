@@ -1,35 +1,50 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    SONAR_TOKEN = credentials('SONAR_TOKEN')  // Jenkins credential ID for SonarQube token
-  }
-
-  parameters {
-    string(name: 'BRANCH_NAME', defaultValue: 'thanu.developer', description: 'Git branch to build')
-  }
-
-  triggers {
-    githubPush()
-  }
-
-  tools {                // Optional: replace with your Jenkins Maven installation name
-    sonarQubeScanner 'sonar-scanner'   // Must match the name in Global Tool Configuration
-  }
-
-  stages {
-    stage('Checkout Code') {
-      steps {
-        checkout([
-          $class: 'GitSCM',
-          branches: [[name: "*/${params.BRANCH_NAME}"]],
-          userRemoteConfigs: [[url: 'https://github.com/Thanushree841/pipeline.git']]
-        ])
-      }
+    tools {
+        maven 'Maven 3.9.4'                 // Must match the tool name in Jenkins → Global Tool Configuration
+        sonarQubeScanner 'sonar-scanner'    // Must match the name you configured in Jenkins tools
     }
 
-    stage('SonarQube Scan') {
-      steps {
-        script {
-          def scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarScannerInstallation'
-          withSonarQubeEnv('MySonar') {
+    environment {
+        SONAR_TOKEN = credentials('SONAR_TOKEN')  // Jenkins secret text credentials ID
+    }
+
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch to build')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('MySonar') {
+                    sh "mvn sonar:sonar -Dsonar.token=$SONAR_TOKEN"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline completed.'
+        }
+        success {
+            echo 'Pipeline succeeded.'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
