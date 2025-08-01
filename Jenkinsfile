@@ -2,11 +2,11 @@ pipeline {
   agent any
 
   tools {
-    sonarQube 'sonar_scanner' // Must match name configured in Jenkins → Global Tool Configuration
+    sonarQube 'sonar_scanner' // Must match name in Global Tool Configuration
   }
 
   environment {
-    SONAR_TOKEN = credentials('sonar-token') // Replace with your actual Jenkins credential ID
+    SONAR_TOKEN = credentials('sonar-token') // Replace with actual Jenkins credential ID
   }
 
   triggers {
@@ -23,12 +23,11 @@ pipeline {
 
     stage('SonarQube Scan') {
       steps {
-        withSonarQubeEnv('MySonar') { // Must match Jenkins → Configure System → SonarQube server name
-          // Note: This block must be left-aligned and clean
+        withSonarQubeEnv('MySonar') { // Must match name in Jenkins Configure System
           sh '''#!/bin/bash
-sonar-scanner \\
-  -Dsonar.projectKey=myproject \\
-  -Dsonar.sources=. \\
+sonar-scanner \
+  -Dsonar.projectKey=myproject \
+  -Dsonar.sources=. \
   -Dsonar.login=$SONAR_TOKEN
 '''
         }
