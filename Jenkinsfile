@@ -1,51 +1,72 @@
 pipeline {
-agent any
+  agent any
 
-tools {
-// Must match name in Jenkins > Global Tool Configuration > SonarQube Scanner installations
-sonarQube 'sonar_scanner'
-}
-
-environment {
-// Must match ID of a secret text credential in Jenkins
-SONAR_TOKEN = credentials('sonar-token')
-}
-
-triggers {
-githubPush() // Automatically trigger on GitHub push
-}
-
-stages {
-  stage('Checkout Code') {
-  steps {
-    checkout scm // Checks out current branch from GitHub
+  tools {
+    // Must match the name in Jenkins → Global Tool Configuration
+    sonarQube 'sonar_scanner'
   }
-}
 
-stage('SonarQube Scan') {
-  steps {
-    withSonarQubeEnv('MySonar') { // Must match name defined under "Configure System"
-      sh '''#!/bin/bash
-        sonar-scanner \
-          -Dsonar.projectKey=myproject \
-          -Dsonar.sources=. \
-          -Dsonar.login=$SONAR_TOKEN
-      '''
+  environment {
+    // Must match the ID of a Jenkins secret text credential
+    SONAR_TOKEN = credentials('sonar-token')
+  }
+
+  parameters {
+    string(name: 'BRANCH_NAME', defaultValue: 'thanu.developer', description: 'Git branch to build')
+  }
+
+  triggers {
+    githubPush()
+  }
+
+  stages {
+
+    stage('Checkout Code') {
+      steps {
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: "*/${params.BRANCH_NAME}"]],
+          userRemoteConfigs: [[url: 'https://github.com/Thanushree841/pipeline.git']]
+        ])
+      }
+    }
+
+    stage('SonarQube Scan') {
+      steps {
+        withSonarQubeEnv('MySonar') {
+          sh '''
+            #!/bin/bash
+            sonar-scanner \
+              -Dsonar.projectKey=myproject \
+              -Dsonar.sources=. \
+              -Dsonar.login=$SONAR_TOKEN
+          '''
+        }
+      }
+    }
+
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
+        }
+      }
+    }
+
+    stage('Build & Package') {
+      steps {
+        sh 'mvn clean package'
+        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+      }
     }
   }
-}
 
-stage('Quality Gate') {
-  steps {
-    timeout(time: 5, unit: 'MINUTES') {
-      waitForQualityGate abortPipeline: true
+  post {
+    success {
+      echo '✅ Build, scan, and packaging successful.'
     }
-  }
-}
-
-stage('Build & Package') {
-  steps {
-    sh 'mvn clean package'
-    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+    failure {
+      echo '❌ Build or analysis failed.'
+    }
   }
 }
