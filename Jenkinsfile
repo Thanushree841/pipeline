@@ -14,18 +14,17 @@ pipeline {
             }
         }
 
-        stage('SonarQube Scan') {
-            steps {
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('MySonar') {
-                        echo "Running Sonar Scanner from: ${SONAR_SCANNER_HOME}/bin/sonar-scanner"
-                        sh "${SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=. -Dsonar.host.url=http://13.203.103.245:30900 -Dsonar.login=${SONAR_TOKEN}"
-                    }
-                }
+      stage('SonarQube Scan') {
+    steps {
+        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+            withSonarQubeEnv('MySonar') {
+                sh "${SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=. -Dsonar.host.url=http://13.203.103.245:30900 -Dsonar.login=${SONAR_TOKEN}"
             }
         }
+    }
+}
 
-        stage('Quality Gate') {
+     stage('Quality Gate') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
