@@ -2,8 +2,7 @@ pipeline {
   agent any
 
   environment {
-    // Replace with your actual Jenkins credential ID (case-sensitive)
-    SONAR_TOKEN = credentials('SONAR_TOKEN')  // ⬅️ Use exact ID configured in Jenkins
+    SONAR_TOKEN = credentials('SONAR_TOKEN')
   }
 
   parameters {
@@ -28,7 +27,7 @@ pipeline {
 
     stage('SonarQube Scan') {
       steps {
-        withSonarQubeEnv('MySonar') { // Must match name in Configure System > SonarQube servers
+        withSonarQubeEnv('MySonar') {
           sh '''
             export PATH=$PATH:/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonar-scanner/bin
             sonar-scanner \
@@ -37,3 +36,33 @@ pipeline {
               -Dsonar.login=$SONAR_TOKEN
           '''
         }
+      }
+    }
+
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
+        }
+      }
+    }
+
+    stage('Build & Package') {
+      steps {
+        sh 'mvn clean package'
+        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+      }
+    }
+
+  } // end of stages
+
+  post {
+    success {
+      echo '✅ Build, scan, and packaging successful.'
+    }
+    failure {
+      echo '❌ Build or analysis failed.'
+    }
+  }
+
+} // end of pipeline
