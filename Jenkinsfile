@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    SONAR_TOKEN = credentials('SONAR_TOKEN') // Your Jenkins credential ID for the token
+    SONAR_TOKEN = credentials('SONAR_TOKEN')  // Your SonarQube token credential ID
   }
 
   parameters {
@@ -14,7 +14,6 @@ pipeline {
   }
 
   stages {
-
     stage('Checkout Code') {
       steps {
         checkout([
@@ -27,13 +26,19 @@ pipeline {
 
     stage('SonarQube Scan') {
       steps {
-        withSonarQubeEnv('sonar-scanner') {
-          sh '''
-            sonar-scanner \
-              -Dsonar.projectKey=myproject \
-              -Dsonar.sources=. \
-              -Dsonar.login=$SONAR_TOKEN
-          '''
+        script {
+          // Get the path to sonar-scanner installation
+          def scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+
+          withSonarQubeEnv('sonar-scanner') {
+            sh """
+              export PATH=\$PATH:${scannerHome}/bin
+              sonar-scanner \
+                -Dsonar.projectKey=myproject \
+                -Dsonar.sources=. \
+                -Dsonar.login=$SONAR_TOKEN
+            """
+          }
         }
       }
     }
@@ -59,7 +64,4 @@ pipeline {
       echo '✅ Build, scan, and packaging successful.'
     }
     failure {
-      echo '❌ Build or analysis failed.'
-    }
-  }
-}
+      echo '❌ Build
