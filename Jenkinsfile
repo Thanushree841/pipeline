@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    SONAR_TOKEN = credentials('SONAR_TOKEN')  // Your SonarQube token credential ID
+    SONAR_TOKEN = credentials('SONAR_TOKEN')  // Jenkins credential ID for SonarQube token
   }
 
   parameters {
@@ -11,6 +11,11 @@ pipeline {
 
   triggers {
     githubPush()
+  }
+
+  tools {
+    maven 'Maven 3.9.4'                 // Optional: replace with your Jenkins Maven installation name
+    sonarQubeScanner 'sonar-scanner'   // Must match the name in Global Tool Configuration
   }
 
   stages {
@@ -28,41 +33,4 @@ pipeline {
       steps {
         script {
           def scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarScannerInstallation'
-          withSonarQubeEnv('sonar-scanner') {
-            sh """
-              export PATH=\$PATH:${scannerHome}/bin
-              sonar-scanner \
-                -Dsonar.projectKey=myproject \
-                -Dsonar.sources=. \
-                -Dsonar.login=$SONAR_TOKEN
-            """
-          }
-        }
-      }
-    }
-
-    stage('Quality Gate') {
-      steps {
-        timeout(time: 5, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: true
-        }
-      }
-    }
-
-    stage('Build & Package') {
-      steps {
-        sh 'mvn clean package'
-        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
-      }
-    }
-  }
-
-  post {
-    success {
-      echo "✅ Build, scan, and packaging successful."
-    }
-    failure {
-      echo "❌ Build or analysis failed."
-    }
-  }
-}
+          withSonarQubeEnv('MySonar') {
