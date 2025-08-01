@@ -27,17 +27,19 @@ pipeline {
     }
 
     stage('SonarQube Scan') {
-      steps {
-        withSonarQubeEnv('MySonar') {
-          sh '''
-            sonar-scanner \
-              -Dsonar.projectKey=myproject \
-              -Dsonar.sources=. \
-              -Dsonar.login=$SONAR_TOKEN
-          '''
-        }
-      }
+  steps {
+    withSonarQubeEnv('MySonar') {
+      sh '''
+        export PATH=$PATH:/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonar-scanner/bin
+        sonar-scanner \
+          -Dsonar.projectKey=myproject \
+          -Dsonar.sources=. \
+          -Dsonar.login=$SONAR_TOKEN
+      '''
     }
+  }
+}
+
 
     stage('Quality Gate') {
       steps {
