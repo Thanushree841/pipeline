@@ -13,18 +13,21 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+                echo "Checked out branch: ${params.BRANCH_NAME}"
             }
         }
 
         stage('Build') {
             steps {
+                echo "Building the project with Maven..."
                 sh 'mvn clean install'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('MySonar') { // 'MySonar' must match the name configured in Jenkins → Configure System
+                echo "Starting SonarQube analysis..."
+                withSonarQubeEnv('MySonar') {  // Name should match Jenkins → Configure System → SonarQube
                     sh "mvn sonar:sonar -Dsonar.token=$SONAR_TOKEN"
                 }
             }
@@ -32,14 +35,22 @@ pipeline {
     }
 
     post {
-        always {
-            echo 'Pipeline completed.'
-        }
         success {
-            echo 'Pipeline succeeded.'
+            echo '✅ Pipeline succeeded.'
+            
+            // Archive built JAR files
+            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            
+            // Publish test results if any
+            junit 'target/surefire-reports/*.xml'
         }
+
         failure {
-            echo 'Pipeline failed.'
+            echo '❌ Pipeline failed. Please check the build logs.'
+        }
+
+        always {
+            echo 'ℹ️ Pipeline completed.'
         }
     }
 }
