@@ -1,9 +1,8 @@
 pipeline {
     agent any
-    }
 
     environment {
-        // This must match the name configured in Global Tool Configuration
+        // Must match the name defined in Global Tool Configuration
         SONAR_SCANNER_HOME = tool 'sonar_scanner'
     }
 
@@ -12,13 +11,6 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'thanu.developer', url: 'https://github.com/Thanushree841/pipeline.git'
-            }
-        }
-
-        stage('Print Parameters') {
-            steps {
-                echo "Running in environment: ${params.ENV}"
-                echo "Action selected: ${params.ACTION}"
             }
         }
 
@@ -44,7 +36,7 @@ pipeline {
         stage('Build & Package') {
             steps {
                 echo "Build and packaging logic would go here."
-                // Example (Uncomment if using Maven):
+                // Example: Uncomment below if using Maven
                 // sh 'mvn clean package'
                 // archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
