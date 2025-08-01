@@ -2,15 +2,15 @@ pipeline {
   agent any
 
   tools {
-    sonarQube 'sonar_scanner' // Make sure this matches the name in Jenkins Global Tool Configuration
+    sonarQube 'sonar_scanner' // Must match the name in Jenkins Global Tool Configuration
   }
 
   environment {
-    SONAR_TOKEN = credentials('sonar-token') // Must match your Jenkins credential ID
+    SONAR_TOKEN = credentials('sonar-token') // Must match the credential ID in Jenkins
   }
 
   triggers {
-    githubPush() // Enables webhook trigger
+    githubPush() // Trigger via GitHub webhook
   }
 
   stages {
@@ -21,19 +21,18 @@ pipeline {
       }
     }
 
-  stage('SonarQube Scan') {
-  steps {
-    withSonarQubeEnv('MySonar') {
-      sh '''#!/bin/bash
-      sonar-scanner \
-        -Dsonar.projectKey=myproject \
-        -Dsonar.sources=. \
-        -Dsonar.login=$SONAR_TOKEN
-      '''
+    stage('SonarQube Scan') {
+      steps {
+        withSonarQubeEnv('MySonar') { // Must match the name in Jenkins → Configure System → SonarQube Server
+          sh '''#!/bin/bash
+          sonar-scanner \
+            -Dsonar.projectKey=myproject \
+            -Dsonar.sources=. \
+            -Dsonar.login=$SONAR_TOKEN
+          '''
+        }
+      }
     }
-  }
-}
-
 
     stage('Quality Gate') {
       steps {
