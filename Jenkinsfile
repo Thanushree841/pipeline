@@ -6,11 +6,11 @@ pipeline {
   }
 
   environment {
-    SONAR_TOKEN = credentials('sonar-token') // Must match the credential ID in Jenkins
+    SONAR_TOKEN = credentials('sonar-token') // Must match your Jenkins credential ID
   }
 
   triggers {
-    githubPush() // Trigger via GitHub webhook
+    githubPush() // Enables webhook trigger
   }
 
   stages {
@@ -23,7 +23,7 @@ pipeline {
 
     stage('SonarQube Scan') {
       steps {
-        withSonarQubeEnv('MySonar') { // Must match the name in Jenkins → Configure System → SonarQube Server
+        withSonarQubeEnv('MySonar') { // Must match Jenkins > Configure System > SonarQube server name
           sh '''#!/bin/bash
           sonar-scanner \
             -Dsonar.projectKey=myproject \
