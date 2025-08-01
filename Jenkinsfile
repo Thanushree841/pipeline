@@ -21,18 +21,19 @@ pipeline {
       }
     }
 
-    stage('SonarQube Scan') {
-      steps {
-        withSonarQubeEnv('MySonar') { // 'MySonar' must match the name in "Configure System" → SonarQube Server
-          sh '''
-            sonar-scanner \
-              -Dsonar.projectKey=myproject \
-              -Dsonar.sources=. \
-              -Dsonar.login=$SONAR_TOKEN
-          '''
-        }
-      }
+  stage('SonarQube Scan') {
+  steps {
+    withSonarQubeEnv('MySonar') {
+      sh '''#!/bin/bash
+      sonar-scanner \
+        -Dsonar.projectKey=myproject \
+        -Dsonar.sources=. \
+        -Dsonar.login=$SONAR_TOKEN
+      '''
     }
+  }
+}
+
 
     stage('Quality Gate') {
       steps {
