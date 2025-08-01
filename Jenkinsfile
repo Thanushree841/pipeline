@@ -1,8 +1,13 @@
 pipeline {
   agent any
 
+  tools {
+    // Reference the tool name as defined above
+    sonarScanner 'sonar_scanner'
+  }
+
   environment {
-    SONAR_TOKEN = credentials('SONAR_TOKEN')
+    SONAR_TOKEN = credentials(' SONAR_TOKEN') // Jenkins credential ID
   }
 
   parameters {
@@ -29,7 +34,6 @@ pipeline {
       steps {
         withSonarQubeEnv('MySonar') {
           sh '''
-            #!/bin/bash
             sonar-scanner \
               -Dsonar.projectKey=myproject \
               -Dsonar.sources=. \
