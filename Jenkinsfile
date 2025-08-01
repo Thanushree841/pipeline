@@ -8,7 +8,7 @@ pipeline {
 
   environment {
     // Must match the ID of a Jenkins secret text credential
-    SONAR_TOKEN = credentials('sonar-token')
+    SONAR_TOKEN = credentials('SONAR_TOKEN')
   }
 
   parameters {
