@@ -27,7 +27,7 @@ pipeline {
 
     stage('SonarQube Scan') {
       steps {
-        withSonarQubeEnv('MySonar') {
+        withSonarQubeEnv('sonar-scanner') {
           sh '''
             export PATH=$PATH:/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonar-scanner/bin
             sonar-scanner \
