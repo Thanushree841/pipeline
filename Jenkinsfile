@@ -1,13 +1,8 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven 3.9.4'                 // Must match the tool name in Jenkins → Global Tool Configuration
-        sonarQubeScanner 'sonar-scanner'    // Must match the name you configured in Jenkins tools
-    }
-
     environment {
-        SONAR_TOKEN = credentials('SONAR_TOKEN')  // Jenkins secret text credentials ID
+        SONAR_TOKEN = credentials('SONAR_TOKEN')  // Use Jenkins credential ID
     }
 
     parameters {
@@ -29,7 +24,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('MySonar') {
+                withSonarQubeEnv('MySonar') { // 'MySonar' must match the name configured in Jenkins → Configure System
                     sh "mvn sonar:sonar -Dsonar.token=$SONAR_TOKEN"
                 }
             }
