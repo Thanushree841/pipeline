@@ -36,7 +36,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline succeeded.'
+            echo ' Pipeline succeeded.'
             
             // Archive built JAR files
             archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
@@ -46,7 +46,7 @@ pipeline {
         }
 
         failure {
-            echo '❌ Pipeline failed. Please check the build logs.'
+            echo ' Pipeline failed. Please check the build logs.'
         }
 
         always {
